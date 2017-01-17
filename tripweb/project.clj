@@ -13,10 +13,9 @@
                  [ring.middleware.logger "0.5.0"]
                  [compojure "1.5.0"] 
                  [environ "1.0.3"]
-                 [org.omcljs/om "1.0.0-alpha36"]
 
                  [prismatic/om-tools "0.4.0"]
-                 [secretary "1.2.1"]                 
+                 [secretary "1.2.3"]                 
                  
                  [racehub/om-bootstrap "0.6.1"]
                  [org.omcljs/om "1.0.0-alpha41"]
@@ -59,7 +58,9 @@
                            :asset-path "js/compiled/out"
                            :output-to "resources/public/js/compiled/tripweb.js"
                            :output-dir "resources/public/js/compiled/out"
-                           :source-map-timestamp true}}
+                           :source-map-timestamp true
+                           :optimizations :none
+                           :pretty-print true}}
 
                {:id "test"
                 :source-paths ["src/cljs" "test/cljs" "src/cljc" "test/cljc"]
@@ -75,7 +76,15 @@
                            :output-dir "target"
                            :source-map-timestamp true
                            :optimizations :advanced
+                           :closure-warnings {:externs-validation :off}
+                           :externs [
+                             "cljsjs/common/bootstrap.ext.js"
+                             "cljsjs/common/jquery-timepicker.ext.js"
+                             "resources/public/javascript/bootstrap-datepicker.min.js"
+                             "cljsjs/common/jquery.ext.js"
+                           ]
                            :pretty-print false}}]}
+
 
   ;; When running figwheel from nREPL, figwheel will read this configuration
   ;; stanza, but it will read it without passing through leiningen's profile

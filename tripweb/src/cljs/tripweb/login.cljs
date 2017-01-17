@@ -3,7 +3,7 @@
   (:require [om.core :as om :include-macros true]
             [om-tools.dom :as dom :include-macros true]
             [om-tools.core :refer-macros [defcomponent]]
-            [secretary.core :as sec :include-macros true]
+            [secretary.core :as sec :refer-macros [defroute]]
             [goog.events :as events]
             [goog.history.EventType :as EventType]
             [tripweb.core :as tripcore]
@@ -12,15 +12,34 @@
             [om-bootstrap.input :as i]
             [om-bootstrap.button :as b]
             [om-bootstrap.panel :as p]
-            
-            [tripweb.trips :as trips]
-            [tripweb.users :as users]
+
+
+            ;;[tripweb.trips :as trips]
+            ;;[tripweb.users :as users]
             [cljs.core.async :refer [put! dropping-buffer chan take! <!]]
   )
   (:import goog.History)
 )
 
 (enable-console-print!)
+
+
+(def application
+  (js/document.getElementById "app"))
+
+(defn set-html! [el content]
+  (aset el "innerHTML" content))
+
+
+(sec/set-config! :prefix "#")
+
+(let [history (History.)
+      navigation EventType/NAVIGATE]
+  (goog.events/listen history
+                     navigation
+                     #(-> % .-token sec/dispatch!))
+  (doto history (.setEnabled true)))
+
 
 (def ch (chan (dropping-buffer 2)))
 (def jquery (js* "$"))
@@ -88,8 +107,7 @@
     newdata (map menus-to-map response) 
     ]
     
-    (swap! tripcore/app-state assoc-in [:sysmenus]   (into []  newdata) )
-    (swap! admin/app-state assoc-in [:sysmenus]   (into []  newdata) )
+    (swap! tripcore/app-state assoc-in [:sysmenus]   (into []  newdata) )    
     (.log js/console newdata)
     (put! ch 45)
     
@@ -270,49 +288,39 @@
   (login-page-view data owner)
 )
 
+; (sec/defroute home-path "/" []
+;   (set-html! application "<h1>OMG! YOU'RE HOME!</h1>"))
+
+; (sec/defroute index-page "/" []
+;   (om/root login-page-view 
+;            {}
+;            {:target (. js/document (getElementById "app"))}))
+
+; (sec/defroute login-page "/#/login" []
+;   (om/root login-page-view 
+;            app-state
+;            {:target (. js/document (getElementById "app"))}))
+
 (sec/defroute login-page "/login" []
   (om/root login-page-view 
            app-state
-           {:target (. js/document (getElementById "app"))}))
-
-
-(defn onReceivedMenus []
-  ;(.log js/console (count (:sysmenus @t5pcore/app-state)))
-  (swap! app-state assoc-in [:state] 0 )
-  (aset js/window "location" "#/eportal")
-)
-
-(defn setcontrols [value]
-  (case value
-    45 (onReceivedMenus)
-
-    (onReceivedMenus)
+           {:target (. js/document (getElementById "app"))}
   )
 )
 
-(defn initqueue []
-  (doseq [n (range 1000)]
-    (go ;(while true)
-      (take! ch(
-        fn [v] (
-           ;(setcalculatedfields) 
-           setcontrols v
-           ;.log js/console "Core.ASYNVC working!!!" 
-          )
-        )
-      )
-    )
-  )
-)
-
-(initqueue)
 
 (defn main []
   (-> js/document
       .-location
       (set! "#/login"))
 
-  ;(aset js/window "location" "#/login")
+  ;;(aset js/window "location" "#/login")
 )
-  
+
+(sec/defroute "*" []
+  (set-html! application "<h1>LOL! YOU LOST!</h1>"))
 (main)
+  ; (om/root login-page-view 
+  ;          app-state
+  ;          {:target (. js/document (getElementById "app"))}
+  ; )

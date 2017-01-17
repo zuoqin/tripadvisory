@@ -1,16 +1,16 @@
 (ns tripweb.core
   (:require [om.core :as om :include-macros true]
-            ;;[om.dom :as dom :include-macros true]
             [om-tools.dom :as dom :include-macros true]
             [om-tools.core :refer-macros [defcomponent]]
             [secretary.core :as sec :include-macros true]
-            ;;[goog.events :as events]
-            ;;[goog.history.EventType :as EventType]
+            [goog.events :as events]
+            [goog.history.EventType :as EventType]
             [ajax.core :refer [GET POST]]
-
+            [tripweb.settings :as settings]
   )
-
+  (:import goog.History)
 )
+
 
 (enable-console-print!)
 
