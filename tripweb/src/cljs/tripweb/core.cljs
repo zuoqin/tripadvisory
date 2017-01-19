@@ -47,6 +47,23 @@
   )
 )
 
+(defn onDidUpdate [data]
+    (.log js/console "Update Core happened") 
+    ;; (jquery
+    ;;   (fn []
+    ;;     (-> (jquery "#side-menu")
+    ;;       (.metisMenu)
+    ;;     )
+    ;;   )
+    ;; )
+
+)
+
+(defn onMount [data]
+
+)
+
+
 (defcomponent users-navigation-view [data owner]
   (did-mount [_]
     (onMount data)
@@ -97,7 +114,7 @@
             (dom/span {:className "icon-bar"})
           )
           (dom/a  (assoc stylehome :className "navbar-brand")
-            (dom/span {:id "pageTitle"}  "The title")
+            (dom/span {:id "pageTitle"} (:current @data))
           )
         )
         (dom/div {:className "collapse navbar-collapse navbar-ex1-collapse" :id "menu"}

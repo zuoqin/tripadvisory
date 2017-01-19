@@ -14,8 +14,9 @@
             [om-bootstrap.panel :as p]
 
 
-            ;;[tripweb.trips :as trips]
-            ;;[tripweb.users :as users]
+            [tripweb.tripdetail :as tripdetail]
+            [tripweb.trips :as trips]
+            [tripweb.users :as users]
             [cljs.core.async :refer [put! dropping-buffer chan take! <!]]
   )
   (:import goog.History)
@@ -88,57 +89,33 @@
 (defn error-handler [{:keys [status status-text]}]
   (.log js/console (str "something bad happened: " status " " status-text)))
 
-(defn menus-to-map [menu]
-  (let [     
-      newdata {:menucode (get menu "menucode") :menulevel (get menu "menulevel") :menuopt (get menu "menuopt")
-               :menuorder (get menu "menuorder") :name (get menu "name") :submenu (get menu "submenu")
-               :urltarget (get menu "urltarget")
-               }
-    ]
-    ;(.log js/console newdata)
-    newdata
-  )
-  
+
+(defn OnGetTrips [response]
+  (swap! tripcore/app-state assoc [:user :trips]   (get response 0)  )
+  (aset js/window "location" "#/trips")
 )
 
 
-(defn OnGetSysMenu [response]
-  (let [ 
-    newdata (map menus-to-map response) 
-    ]
-    
-    (swap! tripcore/app-state assoc-in [:sysmenus]   (into []  newdata) )    
-    (.log js/console newdata)
-    (put! ch 45)
-    
-  )
-)
-
-(defn reqsysmenu []
-  (GET (str settings/apipath "api/sysmenu") {:handler OnGetSysMenu
+(defn reqtrips []
+  (GET (str settings/apipath "api/trip?login=" (:login (:user @tripcore/app-state )) ) {:handler OnGetTrips
                                             :error-handler error-handler
-                                            :headers {:content-type "application/json" :Authorization (str "Bearer "  (:token  (first (:token @tripcore/app-state)))) }
+                                            :headers {:content-type "application/json" :Authorization (str "Bearer "  (:token  (:token @tripcore/app-state))) }
                                             })
 )
+
+
 
 (defn setUser [theUser]
   (if (= (first theUser) "zuoqin")   
     (swap! tripcore/app-state assoc-in [:user :role] (second theUser) )
-
-  )
-  
+  )  
 )
 
 
-
 (defn OnGetUser [response]
-  ;; (for [user response  ] ;;:when ( = (first user) "zuoqin")
-  ;;   (setUser user)
-
-  ;;      )
-
   (doall (map setUser response))
-  ;(println response)
+
+  (reqtrips)
 )
 
 
@@ -151,36 +128,18 @@
 )
 
 
-(defn OnGetTrips [response]
-  (swap! tripcore/app-state assoc [:user :trips]   (get response 0)  )
-)
-
-
-(defn reqtrips []
-  (GET (str settings/apipath "api/trip?login=" (:login (:user @tripcore/app-state )) ) {:handler OnGetTrips
-                                            :error-handler error-handler
-                                            :headers {:content-type "application/json" :Authorization (str "Bearer "  (:token  (:token @tripcore/app-state))) }
-                                            })
-)
-
-
 (defn OnLogin [response]
   (
     let [     
       ;response1 (js->clj response)
-      newdata {:token (get response (keyword "access_token"))  :expires (get response (keyword "expires_in") ) }  
-     
-;;[{:Title (get (first response) "Title") :Introduction  (get (first response) "Introduction") :Reference  (get (first response) "Reference") :Updated  (get (first response) "Updated") :Published (get (first response) "Pub;ished")}]
+      newdata {:token (get response (keyword "access_token"))  :expires (get response (keyword "expires_in") ) }
     ]
 
     (.log js/console (str newdata))
     ;;(.log js/console (str (select-keys (js->clj response) [:Title :Reference :Introduction])  ))    
     (swap! tripcore/app-state assoc-in [:token] newdata )
     (swap! tripcore/app-state assoc-in [:view] 1 )
-    (reqtrips)
     (requser)
-    
-
   )
   
   ;;(.log js/console (str  (response) ))
@@ -317,8 +276,8 @@
   ;;(aset js/window "location" "#/login")
 )
 
-(sec/defroute "*" []
-  (set-html! application "<h1>LOL! YOU LOST!</h1>"))
+;; (sec/defroute "*" []
+;;   (set-html! application "<h1>LOL! YOU LOST!</h1>"))
 (main)
   ; (om/root login-page-view 
   ;          app-state

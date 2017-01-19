@@ -44,7 +44,7 @@
       (map (fn [item]
         (dom/span
           (dom/a {:className "list-group-item" :href (str  "#/tripdetail/" (get item "tripid") ) }
-            (dom/h4  #js {:className "list-group-item-heading" :dangerouslySetInnerHTML #js {:__html (setItemSubject item)}} nil)
+            (dom/h4  #js {:className "list-group-item-heading" :dangerouslySetInnerHTML #js {:__html "New Item!!!"}} nil)
             ;(dom/h4 {:className "list-group-item-heading"} (get item "subject"))
             (dom/h6 {:className "paddingleft2"} (get item "senddate"))
             ;(dom/p  #js {:className "list-group-item-text paddingleft2" :dangerouslySetInnerHTML #js {:__html (get item "body")}} nil)
@@ -56,11 +56,10 @@
   )
 )
 
+
+
 (defn onMount [data]
-  (getTrips data)
-  (swap! tripcore/app-state assoc-in [:current] 
-    "Trips"
-  )
+
 )
 
 
@@ -75,7 +74,7 @@
       ]
       (dom/div
         (om/build tripcore/website-view tripcore/app-state {})
-        (dom/div  (assoc styleprimary  :className "panel panel-primary" :onClick (fn [e](displaymessages e)))
+        (dom/div  (assoc styleprimary  :className "panel panel-primary" :onClick (fn [e](println e)))
           (dom/div {:className "panel-heading"}
             (dom/div {:className "row"}
               (dom/div {:className "col-md-10"}

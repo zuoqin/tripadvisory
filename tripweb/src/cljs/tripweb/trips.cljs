@@ -22,22 +22,11 @@
 )
 
 (defn OnGetTrips [response]
-   (swap! app-state assoc :trips  (get response "Trips")  )
+   (swap! app-state assoc :trips response  )
    (.log js/console (:users @app-state)) 
 
 )
 
-
-(defn OnGetMessagesPage [response]
-  (let [
-    messages (:messages @app-state)
-    ]
-    (swap! app-state assoc :messages 
-           (into [] (concat messages (get response "Messages")))
-           ) 
-
-  )
-)
 
 (defn error-handler [{:keys [status status-text]}]
   (.log js/console (str "something bad happened: " status " " status-text))
@@ -57,12 +46,12 @@
 )
 
 (defn getTrips [data] 
-  (GET (str settings/apipath "api/trip?login=" (:user @tripcore/app-state)) {
+  (GET (str settings/apipath "api/trip?login=" (:login (:user @tripcore/app-state)) ) {
     :handler OnGetTrips
     :error-handler error-handler
     :headers {
       :content-type "application/json"
-      :Authorization (str "Bearer "  (:token  (first (:token @tripcore/app-state)))) }
+      :Authorization (str "Bearer "  (:token (:token @tripcore/app-state))) }
   })
 )
 
@@ -73,10 +62,10 @@
     (dom/div {:className "list-group" :style {:display "block"}}
       (map (fn [item]
         (dom/span
-          (dom/a {:className "list-group-item" :href (str  "#/tripdetail/" (get item "tripid") ) }
-            (dom/h4  #js {:className "list-group-item-heading" :dangerouslySetInnerHTML #js {:__html (setItemSubject item)}} nil)
+          (dom/a {:className "list-group-item" :href (str  "#/tripdetail/" (nth item 0) ) }
+            (dom/h4  #js {:className "list-group-item-heading" :dangerouslySetInnerHTML #js {:__html (nth item 1)}} nil)
             ;(dom/h4 {:className "list-group-item-heading"} (get item "subject"))
-            (dom/h6 {:className "paddingleft2"} (get item "senddate"))
+            (dom/h6 {:className "paddingleft2"} (nth item 2))
             ;(dom/p  #js {:className "list-group-item-text paddingleft2" :dangerouslySetInnerHTML #js {:__html (get item "body")}} nil)
           ) 
         )                  
@@ -105,7 +94,7 @@
       ]
       (dom/div
         (om/build tripcore/website-view tripcore/app-state {})
-        (dom/div  (assoc styleprimary  :className "panel panel-primary" :onClick (fn [e](displaymessages e)))
+        (dom/div  (assoc styleprimary  :className "panel panel-primary" :onClick (fn [e](println e)))
           (dom/div {:className "panel-heading"}
             (dom/div {:className "row"}
               (dom/div {:className "col-md-10"}
@@ -129,7 +118,7 @@
 
 
 
-(sec/defroute messages-page "/messages" []
+(sec/defroute messages-page "/trips" []
   (om/root trips-view
            app-state
            {:target (. js/document (getElementById "app"))}))
