@@ -121,56 +121,55 @@
                                             })
 )
 
+(defn setUser [theUser]
+  (if (= (first theUser) "zuoqin")   
+    (swap! tripcore/app-state assoc-in [:user :role] (second theUser) )
+
+  )
+  
+)
+
+
+
 (defn OnGetUser [response]
-  (
-    let [     
-      newdata {:userid (get response "userid") :datemask (get response "datemask") :timemask (get response "timemask")
-        :language (get response "language")}
-    ]
-    (swap! tripcore/app-state assoc-in [:User] newdata )
-    (reqsysmenu)
-  )
-)
+  ;; (for [user response  ] ;;:when ( = (first user) "zuoqin")
+  ;;   (setUser user)
 
-(defn OnGetEmployee [response]
-  (
-    let [     
-      newdata {:empid (get (get response "Emphr") "empid")
-               :portrait (get (get response "Emphr") "portrait")
-               :EmpName (get (get response "Emphr") "EmpName") :Roster (get response "RosterList")  }
-    ]
-    (swap! tripcore/app-state assoc-in [:Employee] newdata )
-  )
-)
+  ;;      )
 
+  (doall (map setUser response))
+  ;(println response)
+)
 
 
 (defn requser []
   (GET (str settings/apipath "api/user") {
     :handler OnGetUser
     :error-handler error-handler
-    :headers {:content-type "application/json" :Authorization (str "Bearer "  (:token  (first (:token @tripcore/app-state)))) }
+    :headers {:content-type "application/json" :Authorization (str "Bearer "  (:token  (:token @tripcore/app-state))) }
   })
 )
 
-(defn reqemployee []
-  (GET (str settings/apipath "api/employee") {:handler OnGetEmployee
-                                            :error-handler error-handler
-                                            :headers {:content-type "application/json" :Authorization (str "Bearer "  (:token  (first (:token @tripcore/app-state)))) }
-                                            })
+
+(defn OnGetTrips [response]
+  (swap! tripcore/app-state assoc [:user :trips]   (get response 0)  )
 )
 
 
+(defn reqtrips []
+  (GET (str settings/apipath "api/trip?login=" (:login (:user @tripcore/app-state )) ) {:handler OnGetTrips
+                                            :error-handler error-handler
+                                            :headers {:content-type "application/json" :Authorization (str "Bearer "  (:token  (:token @tripcore/app-state))) }
+                                            })
+)
 
 
 (defn OnLogin [response]
   (
     let [     
-      ;;newdata (js->clj response)
-      newdata (vector {:token (get response "access_token")  :expires (get response "expires_in") }  
-     )
-
-
+      ;response1 (js->clj response)
+      newdata {:token (get response (keyword "access_token"))  :expires (get response (keyword "expires_in") ) }  
+     
 ;;[{:Title (get (first response) "Title") :Introduction  (get (first response) "Introduction") :Reference  (get (first response) "Reference") :Updated  (get (first response) "Updated") :Published (get (first response) "Pub;ished")}]
     ]
 
@@ -178,7 +177,7 @@
     ;;(.log js/console (str (select-keys (js->clj response) [:Title :Reference :Introduction])  ))    
     (swap! tripcore/app-state assoc-in [:token] newdata )
     (swap! tripcore/app-state assoc-in [:view] 1 )
-    (reqemployee)
+    (reqtrips)
     (requser)
     
 
@@ -197,7 +196,7 @@
                                             :headers {:content-type "application/x-www-form-urlencoded"}
                                             :body (str "grant_type=password&username=" username "&password=" password) 
                                             })
-  (swap! app-state assoc-in [:state] 2)
+  (swap! tripcore/app-state assoc-in [:user :login] username)
 )
 
 
@@ -210,6 +209,7 @@
     ]
     ;(aset js/window "location" "http://localhost:3449/#/something")
     ;(.log js/console owner ) 
+
     (.log js/console (str  theUserName ))
     (dologin (str theUserName) (str thePassword)) 
   )

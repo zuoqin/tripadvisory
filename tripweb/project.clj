@@ -62,6 +62,24 @@
                            :optimizations :none
                            :pretty-print true}}
 
+               {:id "max"
+                :source-paths ["src/cljs" "src/cljc"]
+                :jar true
+                :compiler {:main tripweb.login
+                           :asset-path "js/compiled/out"
+                           :output-to "resources/public/js/compiled/tripweb.js"
+                           :output-dir "resources/public/js/compiled2/out"
+                           :source-map-timestamp true
+                           :optimizations :none
+                           :closure-warnings {:externs-validation :off}
+                           :externs [
+                             "cljsjs/common/bootstrap.ext.js"
+                             "cljsjs/common/jquery-timepicker.ext.js"
+                             "resources/public/javascript/bootstrap-datepicker.min.js"
+                             "cljsjs/common/jquery.ext.js"
+                           ]
+                           :pretty-print true}}
+
                {:id "test"
                 :source-paths ["src/cljs" "test/cljs" "src/cljc" "test/cljc"]
                 :compiler {:output-to "resources/public/js/compiled/testable.js"
@@ -72,7 +90,7 @@
                 :source-paths ["src/cljs" "src/cljc"]
                 :jar true
                 :compiler {:main tripweb.login
-                           :output-to "resources/public/js/compiled/tripweb.js"
+                           :output-to "resources/public/js/compiled1/tripweb.js"
                            :output-dir "target"
                            :source-map-timestamp true
                            :optimizations :advanced
@@ -136,7 +154,7 @@
 
              :uberjar
              {:source-paths ^:replace ["src/clj" "src/cljc"]
-              :prep-tasks ["compile" ["cljsbuild" "once" "min"]]
+              :prep-tasks ["compile" ["cljsbuild" "once" "max"]]
               :hooks []
               :omit-source true
               :aot :all}})

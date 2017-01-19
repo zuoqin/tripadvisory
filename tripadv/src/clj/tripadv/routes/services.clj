@@ -68,6 +68,12 @@
       :body-params [login :- String, password :- String, role :- String]
       :summary     "Delete user"
       (ok (userapi/updateUser (nth (str/split authorization #" ") 1) login password role)))
+
+
+    (OPTIONS "/user" []
+      :summary  "Allows OPTIONS requests"
+      (ok "")
+    )    
   )
 
 
@@ -101,6 +107,13 @@
       :body-params [id :- Long, login :- String, destination :- String, startdate :- String, enddate :- String, description :- String]
       :summary     "Delete user"
       (ok (tripapi/updateTrip (nth (str/split authorization #" ") 1) id destination startdate enddate description )))
+
+    (OPTIONS "/trip" []
+      :summary  "Allows OPTIONS requests"
+      (ok "")
+    )    
+
+
   )
 )
 
