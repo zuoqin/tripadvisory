@@ -16,7 +16,7 @@
 
 ;;(defonce app-state (atom {:text "Hello Chestnut!"}))
 
-(defonce app-state (atom {:view 1 :current "Home"}))
+(defonce app-state (atom {:view 1 :current "Home" :users []}))
 
 
 (def jquery (js* "$"))

@@ -13,7 +13,7 @@
             [om-bootstrap.button :as b]
             [om-bootstrap.panel :as p]
 
-
+            [tripweb.userdetail :as userdetail]
             [tripweb.tripdetail :as tripdetail]
             [tripweb.trips :as trips]
             [tripweb.users :as users]
@@ -106,15 +106,18 @@
 
 
 (defn setUser [theUser]
+  (let [cnt (count (:users @tripcore/app-state))]
+    (swap! tripcore/app-state assoc-in [:users cnt] {:role (second theUser)  :login (first theUser)})
+  )
   (if (= (first theUser) "zuoqin")   
     (swap! tripcore/app-state assoc-in [:user :role] (second theUser) )
-  )  
+  )
+  
 )
 
 
 (defn OnGetUser [response]
   (doall (map setUser response))
-
   (reqtrips)
 )
 
@@ -139,6 +142,7 @@
     ;;(.log js/console (str (select-keys (js->clj response) [:Title :Reference :Introduction])  ))    
     (swap! tripcore/app-state assoc-in [:token] newdata )
     (swap! tripcore/app-state assoc-in [:view] 1 )
+    (swap! tripcore/app-state assoc-in [:users] [] )
     (requser)
   )
   

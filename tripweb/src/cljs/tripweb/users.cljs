@@ -43,14 +43,14 @@
     (dom/div {:className "list-group" :style {:display "block"}}
       (map (fn [item]
         (dom/span
-          (dom/a {:className "list-group-item" :href (str  "#/tripdetail/" (get item "tripid") ) }
-            (dom/h4  #js {:className "list-group-item-heading" :dangerouslySetInnerHTML #js {:__html "New Item!!!"}} nil)
+          (dom/a {:className "list-group-item" :href (str  "#/userdetail/" (:login item ) ) }
+            (dom/h4  #js {:className "list-group-item-heading" :dangerouslySetInnerHTML #js {:__html (:login item)}} nil)
             ;(dom/h4 {:className "list-group-item-heading"} (get item "subject"))
             (dom/h6 {:className "paddingleft2"} (get item "senddate"))
             ;(dom/p  #js {:className "list-group-item-text paddingleft2" :dangerouslySetInnerHTML #js {:__html (get item "body")}} nil)
           ) 
         )                  
-        )(:trips data)
+        )(:users @tripcore/app-state)
       )
     )
   )
@@ -59,7 +59,10 @@
 
 
 (defn onMount [data]
-
+  ; (getUsers data)
+  (swap! tripcore/app-state assoc-in [:current] 
+    "Users"
+  )
 )
 
 
@@ -75,17 +78,16 @@
       (dom/div
         (om/build tripcore/website-view tripcore/app-state {})
         (dom/div  (assoc styleprimary  :className "panel panel-primary" :onClick (fn [e](println e)))
-          (dom/div {:className "panel-heading"}
-            (dom/div {:className "row"}
-              (dom/div {:className "col-md-10"}
-                (dom/span {:style {:float "left"} :className "glyphicon glyphicon-chevron-down"})
-                (dom/span {:style {:padding-left "5px"}} "我的消息")
-              )
-              (dom/div {:className "col-md-2"}
-                (dom/span {:className "badge" :style {:float "right" }} (str (:msgcount data))  )
-              )
-            )
-          )
+          ; (dom/div {:className "panel-heading"}
+          ;   (dom/div {:className "row"}
+          ;     ; (dom/div {:className "col-md-10"}
+          ;     ;   (dom/span {:style {:padding-left "5px"}} "我的消息")
+          ;     ; )
+          ;     ; (dom/div {:className "col-md-2"}
+          ;     ;   (dom/span {:className "badge" :style {:float "right" }} (str (:msgcount data))  )
+          ;     ; )
+          ;   )
+          ; )
           (om/build showusers-view  data {})
         )
       ) 
@@ -98,7 +100,7 @@
 
 
 
-(sec/defroute messages-page "/users" []
+(sec/defroute users-page "/users" []
   (om/root users-view
            app-state
            {:target (. js/document (getElementById "app"))}))
