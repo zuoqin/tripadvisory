@@ -77,7 +77,8 @@
       ]
       (dom/div
         (om/build tripcore/website-view tripcore/app-state {})
-        (dom/div  (assoc styleprimary  :className "panel panel-primary" :onClick (fn [e](println e)))
+        (dom/div  (assoc styleprimary  :className "panel panel-primary" ;;:onClick (fn [e](println e))
+        )
           ; (dom/div {:className "panel-heading"}
           ;   (dom/div {:className "row"}
           ;     ; (dom/div {:className "col-md-10"}

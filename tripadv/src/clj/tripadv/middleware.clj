@@ -61,7 +61,7 @@
 (def cors-headers 
   { "Access-Control-Allow-Origin" "*"
     "Access-Control-Allow-Headers" "authorization,content-type"
-    "Access-Control-Allow-Methods" "GET,POST,OPTIONS" })
+    "Access-Control-Allow-Methods" "GET,PUT,DELETE,POST,OPTIONS" })
 
 (defn all-cors
   "Allow requests from all origins"

@@ -105,7 +105,7 @@
       ;;:return      Long
       :header-params [authorization :- String]
       :body-params [id :- Long, login :- String, destination :- String, startdate :- String, enddate :- String, description :- String]
-      :summary     "Delete user"
+      :summary     "Update trip"
       (ok (tripapi/updateTrip (nth (str/split authorization #" ") 1) id destination startdate enddate description )))
 
     (OPTIONS "/trip" []

@@ -7,6 +7,7 @@
             [goog.history.EventType :as EventType]
             [ajax.core :refer [GET POST]]
             [tripweb.settings :as settings]
+            [om.dom :as omdom :include-macros true]
   )
   (:import goog.History)
 )
@@ -47,8 +48,57 @@
   )
 )
 
+
+(defn handle-change [e owner]
+  ;(.log js/console () e)
+  (swap! app-state assoc-in [:form (keyword (.. e -target -id))] 
+    (.. e -target -value)
+  ) 
+)
+
+
+(defn onDropDownChange [id value]
+  ;(.log js/console () e)
+  (let [
+        users (:users app-state    )
+        user (first (filter (fn [user] (if (= (:login user) value) true false))))]
+    (swap! app-state assoc-in [:user] user)
+
+  )
+   
+)
+
+(defn buildUsersList [data owner]
+  (map
+    (fn [text]
+      (dom/option {:key (:login text) :value (:login text)
+                    :onChange #(handle-change % owner)} (:login text))
+    )
+    (:users @app-state )
+  )
+)
+
+(defn setUsersDropDown []
+  ;;(put! ch 46) 
+  (jquery
+    (fn []
+      (-> (jquery "#users" )
+        (.selectpicker {})
+        (.on "change"
+          (fn [e]
+            (
+              onDropDownChange (.. e -target -id) (.. e -target -value)
+            )
+          )
+        )
+      )
+    )
+  )
+)
+
 (defn onDidUpdate [data]
     (.log js/console "Update Core happened") 
+  (setUsersDropDown)
     ;; (jquery
     ;;   (fn []
     ;;     (-> (jquery "#side-menu")
@@ -60,7 +110,8 @@
 )
 
 (defn onMount [data]
-
+  (.log js/console "Mount core happened")
+  (setUsersDropDown)
 )
 
 
@@ -118,12 +169,22 @@
           )
         )
         (dom/div {:className "collapse navbar-collapse navbar-ex1-collapse" :id "menu"}
-          (dom/ul {:className "nav navbar-nav"}
+          (dom/ul {:className "nav navbar-nav" :style {:padding-top "17px" :visibility (if (= (:current @app-state) "Trips") "visible" "hidden")}}
             (dom/li
-              (dom/a (assoc style :href "#/eportal")
-                (dom/span {:className "glyphicon glyphicon-home"})
-                  "Trips block"
-                )
+              ;; (dom/a (assoc style :href "#/eportal")
+              ;;   (dom/span {:className "glyphicon glyphicon-home"})
+              ;;     "Trips block"
+              ;;   )
+
+              (omdom/select #js {:id "users"
+                                 :className "selectpicker"
+                                 :data-show-subtext "true"
+                                 :data-live-search "true"
+                                 :onChange #(handle-change % owner)
+                                 }                
+                (buildUsersList data owner)
+              )
+              
             )
           )
          

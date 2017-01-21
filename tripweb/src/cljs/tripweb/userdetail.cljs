@@ -7,7 +7,7 @@
             [goog.events :as events]
             [goog.history.EventType :as EventType]
             [tripweb.core :as tripcore]
-            [ajax.core :refer [GET POST]]
+            [ajax.core :refer [GET POST PUT DELETE]]
             [clojure.string :as str]
             [om-bootstrap.button :as b]
             [om-bootstrap.panel :as p]
@@ -29,6 +29,53 @@
 (defonce app-state (atom  {:login "zorcheal" :password "Q" :roles [{:name "admin"} {:name "manager"} {:name "user"}]  :view 1 :current "User Detail"} ))
 
 
+(defn OnDeleteUserError [response]
+  (let [     
+      newdata {:tripid (get response (keyword "tripid") ) }
+    ]
+
+  )
+  ;; TO-DO: Delete Trip from Core
+  ;;(.log js/console (str  (get (first response)  "Title") ))
+)
+
+
+(defn OnDeleteUserSuccess [response]
+  (let [
+      users (:users @tripcore/app-state    )  
+      newusers (remove (fn [user] (if (= (:login user) (:login @app-state) ) true false  )) users)
+    ]
+    ;(swap! tripcore/app-state assoc-in [:token] newdata )
+    (swap! tripcore/app-state assoc-in [:users] newusers)
+  )
+  ;; TO-DO: Delete Trip from Core
+  ;;(.log js/console (str  (get (first response)  "Title") ))
+)
+
+
+(defn deleteUser [login]
+  (DELETE (str settings/apipath  "api/user?login=" login) {
+    :handler OnDeleteUserSuccess
+    :error-handler OnDeleteUserError
+    :headers {
+      :content-type "application/json" 
+      :Authorization (str "Bearer "  (:token (:token @tripcore/app-state)))}
+    :format :json})
+)
+
+
+
+(defn updateUser []
+  (PUT (str settings/apipath  "api/user") {
+    :handler OnDeleteUserSuccess
+    :error-handler OnDeleteUserError
+    :headers {
+      :content-type "application/json" 
+      :Authorization (str "Bearer "  (:token (:token @tripcore/app-state)))}
+    :format :json
+    :params {:login (:login @app-state) :password (:password @app-state) :role (:role @app-state) }})
+)
+
 
 (defn onDropDownChange [id value]
   ;(.log js/console () e)
@@ -37,11 +84,11 @@
 
 
 (defn setRolesDropDown []
-  (put! ch 46) 
+  ;;(put! ch 46) 
   (jquery
     (fn []
       (-> (jquery "#roles" )
-        (.selectpicker {})
+        (.selectpicker "val" "user")
         (.on "change"
           (fn [e]
             (
@@ -63,18 +110,7 @@
 
 (defn setcontrols [value]
   (case value
-    46 (jquery
-         (fn []
-           (-> (jquery "#payrollgroups" )
-             (.selectpicker "val"
-               (if (nil? (:payrollgroupid (:employee @app-state)))
-                 (:payrollgroups (:form @app-state))
-                 (:payrollgroupid (:employee @app-state))                   
-               )
-             )
-           )
-         )
-       )
+    46 (setRolesDropDown)
   )
 )
 
@@ -153,7 +189,7 @@
     "User Detail"
   )
   (getUserDetail)
-  ;;(setcontrols)
+  (setcontrols 46)
 )
 
 
@@ -184,7 +220,7 @@
   (did-update [this prev-props prev-state]
     (.log js/console "Update happened") 
 
-    (put! ch 42)
+    (put! ch 46)
   )
   (render
     [_]
@@ -229,8 +265,8 @@
         )
         (dom/nav {:className "navbar navbar-default" :role "navigation"}
           (dom/div {:className "navbar-header"}
-            (b/button {:className "btn btn-default"} "Update")
-            (b/button {:className "btn btn-danger"} "Delete")
+            (b/button {:className "btn btn-default" :onClick (fn [e] (updateUser))} "Update")
+            (b/button {:className "btn btn-danger" :onClick (fn [e] (deleteUser (:login @app-state)))} "Delete")
           )
         )
       )

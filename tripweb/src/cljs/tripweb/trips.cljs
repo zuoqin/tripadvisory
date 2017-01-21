@@ -15,14 +15,10 @@
 (defonce app-state (atom  {:users [] :trips [] }))
 
 
-(defn OnGetUsers [response]
-   (swap! app-state assoc :users  (get response "Users")  )
-   (.log js/console (:users @app-state)) 
-
-)
 
 (defn OnGetTrips [response]
    (swap! app-state assoc :trips response  )
+   (tripcore/setUsersDropDown)
    (.log js/console (:users @app-state)) 
 
 )
@@ -34,16 +30,6 @@
 
 
 
-
-(defn getUsers [data] 
-  (GET (str settings/apipath "api/user") {
-    :handler OnGetUsers
-    :error-handler error-handler
-    :headers {
-      :content-type "application/json"
-      :Authorization (str "Bearer "  (:token  (first (:token @tripcore/app-state)))) }
-  })
-)
 
 (defn getTrips [data] 
   (GET (str settings/apipath "api/trip?login=" (:login (:user @tripcore/app-state)) ) {
@@ -94,23 +80,11 @@
       ]
       (dom/div
         (om/build tripcore/website-view tripcore/app-state {})
-        (dom/div  (assoc styleprimary  :className "panel panel-primary" :onClick (fn [e](println e)))
-          (dom/div {:className "panel-heading"}
-            (dom/div {:className "row"}
-              (dom/div {:className "col-md-10"}
-                (dom/span {:style {:float "left"} :className "glyphicon glyphicon-chevron-down"})
-                (dom/span {:style {:padding-left "5px"}} "我的消息")
-              )
-              (dom/div {:className "col-md-2"}
-                (dom/span {:className "badge" :style {:float "right" }} (str (:msgcount data))  )
-              )
-            )
-          )
+        (dom/div  (assoc styleprimary  :className "panel panel-primary" ;:onClick (fn [e](println e))
+        )
           (om/build showtrips-view  data {})
         )
       ) 
-
-
     )
   )
 )

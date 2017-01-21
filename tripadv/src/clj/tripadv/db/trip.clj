@@ -10,6 +10,8 @@
 ))
 
 
+(def custom-formatter (f/formatter "dd/mm/yyyy"))
+
 
 (defn get-trips [login]
   (let [
@@ -32,8 +34,8 @@
 
 
 (defn update-trip [id destination startdate enddate description]
-  (let [start (java.util.Date. (c/to-long (f/parse startdate)))
-        end (java.util.Date. (c/to-long (f/parse enddate)))
+  (let [start (java.util.Date. (c/to-long (f/parse custom-formatter startdate)))
+        end (java.util.Date. (c/to-long (f/parse custom-formatter enddate)))
         ]
 
    (d/transact
@@ -58,8 +60,8 @@
                                 ]
                               (d/db conn) user))) 
 
-        start (java.util.Date. (c/to-long (f/parse startdate)))
-        end (java.util.Date. (c/to-long (f/parse enddate)))
+        start (java.util.Date. (c/to-long (f/parse custom-formatter startdate)))
+        end (java.util.Date. (c/to-long (f/parse custom-formatter enddate)))
         ]  
 
 

@@ -7,7 +7,7 @@
             [goog.events :as events]
             [goog.history.EventType :as EventType]
             [tripweb.core :as tripcore]
-            [ajax.core :refer [GET POST]]
+            [ajax.core :refer [GET POST PUT DELETE]]
             [clojure.string :as str]
             [om-bootstrap.button :as b]
             [om-bootstrap.panel :as p]
@@ -15,6 +15,7 @@
             [om-bootstrap.input :as i]
             [cljs-time.core :as tm]
             [cljs-time.format :as tf]
+            [cljs-time.coerce :as tc]
             [tripweb.settings :as settings]
   )
   (:import goog.History)
@@ -24,12 +25,69 @@
 
 (enable-console-print!)
 
+(def custom-formatter (tf/formatter "dd/mm/yyyy"))
+
+(def custom-formatter1 (tf/formatter "MMM dd yyyy hh:mm:ss"))
+
 (def ch (chan (dropping-buffer 2)))
-(defonce app-state (atom  {:to "2000-01-01" :from "2000-01-01" :destination "" :comment "" :view 1 :tripid 0 :current "Trip Detail"} ))
+(defonce app-state (atom  {:to #inst "2016-01-26T00:01:00.000-00:00" :from #inst "2016-01-26T00:01:00.000-00:00" :destination "" :comment "" :view 1 :tripid 0 :current "Trip Detail"} ))
+
+(defn OnDeleteTripError [response]
+  (let [     
+      newdata {:tripid (get response (keyword "tripid") ) }
+    ]
+
+  )
+  ;; TO-DO: Delete Trip from Core
+  ;;(.log js/console (str  (get (first response)  "Title") ))
+)
 
 
+(defn OnDeleteTripSuccess [response]
+  (let [
+      trips (:trips ( (keyword (:login (:user @tripcore/app-state)) ) @tripcore/app-state  )  )  
+      newtrips (remove (fn [trip] (if (= (str (nth trip 0)) (:tripid @app-state) ) true false  )) trips)
+      newdata {:tripid (get response (keyword "tripid") ) }
+    ]
+    ;(swap! tripcore/app-state assoc-in [:token] newdata )
+    (swap! tripcore/app-state assoc-in [:users] newtrips)
+  )
+  ;; TO-DO: Delete Trip from Core
+  ;;(.log js/console (str  (get (first response)  "Title") ))
+)
 
 
+(defn deleteTrip [tripid]
+  (DELETE (str settings/apipath  "api/trip?id=" tripid) {
+    :handler OnDeleteTripSuccess
+    :error-handler OnDeleteTripError
+    :headers {
+      :content-type "application/json" 
+      :Authorization (str "Bearer "  (:token (:token @tripcore/app-state)))}
+    :format :json})
+)
+
+(defn updateTrip []
+  (PUT (str settings/apipath  "api/trip") {
+    :handler OnDeleteTripSuccess
+    :error-handler OnDeleteTripError
+    :headers {
+      :content-type "application/json" 
+      :Authorization (str "Bearer "  (:token (:token @tripcore/app-state)))}
+    :format :json
+    :params {:to (:to @app-state) :from (:from @app-state) :destination (:destination @app-state) :comment (:comment @app-state) }})
+)
+
+(defn createTrip []
+  (POST (str settings/apipath  "api/trip") {
+    :handler OnDeleteTripSuccess
+    :error-handler OnDeleteTripError
+    :headers {
+      :content-type "application/json" 
+      :Authorization (str "Bearer "  (:token (:token @tripcore/app-state)))}
+    :format :json
+    :params {:to (:to @app-state) :from (:from @app-state) :destination (:destination @app-state) :comment (:comment @app-state) }})
+)
 
 (defn setNewTripValue [key val]
   (swap! app-state assoc-in [(keyword key)] val)
@@ -49,25 +107,28 @@
               dtstring (if
                 (= (count (.. e -dates) ) 0)
                   nil 
-                  "2014-01-12"
+                  (tf/parse custom-formatter1 (subs (str (.. e -date)  )  4 24)  )
               )
 
 
             ]
-             ;; (
-             ;;   if (= dtstring nil) "nil"
-             ;;   (
-             ;;     if (not= 
-             ;;                         ;( (keyword (.. e -target -id)) (:leaveapp @app-state)  )  
-             ;;         ( (keyword (.. e -target -id)) (:leaveapp @app-state))
-             ;;         "2014-01-12"
+                  (
+                       setNewTripValue (.. e -target -id) (tc/to-date dtstring) 
+                 )
+                 ;; (
+                 ;;   if (= dtstring nil) "nil"
+                 ;;   (
+                 ;;     if (not= 
+                 ;;                         ;( (keyword (.. e -target -id)) (:leaveapp @app-state)  )  
+                 ;;         ( (keyword (.. e -target -id)) @app-state)
+                 ;;         (tf/unparse custom-formatter dtstring)
 
-             ;;         )
-             ;;     (
-             ;;       setNewTripValue (.. e -target -id) "2014-01-12"
-             ;;     )
-             ;;   )
-             ;; )
+                 ;;         )
+                 ;;     (
+                 ;;       setNewTripValue (.. e -target -id) (tf/unparse custom-formatter dtstring)
+                 ;;     )
+                 ;;   )
+                 ;; )
            )
          )
        )
@@ -116,12 +177,23 @@
   )
 )
 
+
+;;(tf/unparse custom-formatter (tc/from-date (nth trip 3)) )
+
 (defn setTrip []
-    (swap! app-state assoc-in [:id ] 1 ) 
-    (swap! app-state assoc-in [:from ]  "05/12/2015" ) 
-    (swap! app-state assoc-in [:to ]  "25/12/2016" ) 
-    (swap! app-state assoc-in [:destination] "Moscow" ) 
-    (swap! app-state assoc-in [:comment ] "Nice trip" )
+  (let [
+        login (:login (:user @tripcore/app-state))
+        trip (first (filter (fn [trip] (if (= (:tripid @app-state) (str (nth trip 0))  )  true false)) (:trips ( (keyword login) @tripcore/app-state) )))  ]
+
+       (.log js/console "the trip")
+       (.log js/console trip)
+       (swap! app-state assoc-in [:id ]  (nth trip 0)) 
+       (swap! app-state assoc-in [:from ] (nth trip 3)  ) 
+       (swap! app-state assoc-in [:to ]  (nth trip 4)  )  
+       (swap! app-state assoc-in [:destination] (nth trip 1) ) 
+       (swap! app-state assoc-in [:comment ] (nth trip 2))
+    )
+
 )
 
 
@@ -131,7 +203,7 @@
   (let [     
       newdata { :error (get (:response response)  "error") }
     ]
-    (.log js/console (str  response )) 
+     
     
   )
   
@@ -140,7 +212,6 @@
 
 
 (defn getTripDetail []
-  ;(.log js/console (str "token: " " " (:token  (first (:token @t5pcore/app-state)))       ))
   (if
     (and 
       (not= (:tripid @app-state) nil)
@@ -151,17 +222,15 @@
   )
 )
 
-(defn handleFromChange [e]
-  ;;(.log js/console e  )  
+(defn handleChange [e]
+  (.log js/console e  )  
   (.log js/console "The change ....")
-
+  (swap! app-state assoc-in [(keyword (.. e -nativeEvent -target -id))] (.. e -nativeEvent -target -value))
 )
 
 
 (defn onMount [data]
-  (swap! app-state assoc-in [:current] 
-    "Trip Detail"
-  )
+  (swap! tripcore/app-state assoc-in [:current] "Trip Detail")
   (getTripDetail)
   (setcontrols)
 )
@@ -172,7 +241,7 @@
   )
   (did-update [this prev-props prev-state]
     (.log js/console "Update happened") 
-
+    (swap! tripcore/app-state assoc-in [:current] "Trip Detail")
     (put! ch 42)
   )
   (render
@@ -189,13 +258,13 @@
                 (dom/h3 {:className "panel-title"} (:destination @app-state))
                 
                 (dom/h5 "To: "
-                  (dom/input {:id "to" :type "text" :value (:to @app-state)})
+                  (dom/input {:id "to" :type "text" :value  (tf/unparse custom-formatter (tc/from-date (:to @app-state)) )})
                 )
                 (dom/h5 "From: "
-                  (dom/input {:id "from" :type "text" :value (:from @app-state)})
+                  (dom/input {:id "from" :type "text" :value  (tf/unparse custom-formatter (tc/from-date (:from @app-state)) )})
                 )
                 (dom/h5 "comment: "  
-                  (dom/input {:id "comment" :type "text" :value (:comment @app-state)})  )
+                  (dom/input {:id "comment" :type "text" :value  (:comment @app-state) :onChange (fn [e] (handleChange e )) })  )
               )
               
             )
@@ -203,8 +272,9 @@
         )
         (dom/nav {:className "navbar navbar-default" :role "navigation"}
           (dom/div {:className "navbar-header"}
-            (b/button {:className "btn btn-default"} "Update")
-            (b/button {:className "btn btn-danger"} "Delete")
+            (b/button {:className "btn btn-default" :onClick (fn [e] (updateTrip))} "Update")
+
+            (b/button {:className "btn btn-danger" :onClick (fn [e] (deleteTrip (:tripid @app-state)))} "Delete")
           )
         )
       )
@@ -212,7 +282,6 @@
 
   )
 )
-
 
 
 (sec/defroute tripdetail-page "/tripdetail/:id" {id :id}
@@ -227,10 +296,3 @@
 
   )
 )
-
-
-
-
-
-
-

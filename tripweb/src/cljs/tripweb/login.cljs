@@ -91,7 +91,7 @@
 
 
 (defn OnGetTrips [response]
-  (swap! tripcore/app-state assoc [:user :trips]   (get response 0)  )
+  (swap! tripcore/app-state assoc-in [(keyword (:login (:user @tripcore/app-state))) :trips]   response )
   (aset js/window "location" "#/trips")
 )
 
@@ -220,8 +220,7 @@
       (dom/form {:className "form-signin"}
         (dom/input #js {:type "text" :ref "txtUserName"
            :defaultValue  settings/demouser  :className "form-control" :placeholder "User Name" } )
-        (dom/input {:className "form-control" :ref "txtPassword" :id "txtPassword"
-           :defaultValue settings/demopassword :type "password"  :placeholder "Password"} )
+        (dom/input {:className "form-control" :ref "txtPassword" :id "txtPassword" :defaultValue settings/demopassword :type "password"  :placeholder "Password"} )
         (dom/button #js {
           :className (if (= (:state @app-state) 0) "btn btn-lg btn-primary btn-block" "btn btn-lg btn-primary btn-block m-progress" )  :type "button" :onClick (fn [e](checklogin owner))} "Login")
         
