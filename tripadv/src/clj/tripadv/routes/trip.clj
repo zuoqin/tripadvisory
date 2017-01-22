@@ -29,10 +29,12 @@
     usercode (:iss (-> token str->jwt :claims)  ) 
     ;;; TO-DO: add check authorization to add 
 
-    result {:res "Success"}
+    res (db/create-trip user destination startdate enddate description)
+
+    result {:res "Success" :id res}
     ]
     
-    (db/create-trip user destination startdate enddate description)
+    
     ;; TO-DO Add check successfull
     result
   )

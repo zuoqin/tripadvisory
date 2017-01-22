@@ -56,16 +56,33 @@
   ) 
 )
 
+(defn OnGetTrips [response]
+   (swap! app-state assoc-in [(keyword (:selecteduser @app-state)) :trips] response)
+)
+
+
+(defn error-handler [{:keys [status status-text]}]
+  (.log js/console (str "something bad happened: " status " " status-text))
+)
+
+(defn getTrips [] 
+  (GET (str settings/apipath "api/trip?login=" (:selecteduser @app-state) ) {
+    :handler OnGetTrips
+    :error-handler error-handler
+    :headers {
+      :content-type "application/json"
+      :Authorization (str "Bearer "  (:token (:token @app-state))) }
+  })
+)
+
 
 (defn onDropDownChange [id value]
-  ;(.log js/console () e)
-  (let [
-        users (:users app-state    )
-        user (first (filter (fn [user] (if (= (:login user) value) true false))))]
-    (swap! app-state assoc-in [:user] user)
+  (swap! app-state assoc-in [:selecteduser] value)
 
+  
+  (if (nil? (:trips ((keyword value) @app-state)))
+    (getTrips)
   )
-   
 )
 
 (defn buildUsersList [data owner]
@@ -79,21 +96,33 @@
 )
 
 (defn setUsersDropDown []
-  ;;(put! ch 46) 
   (jquery
-    (fn []
-      (-> (jquery "#users" )
-        (.selectpicker {})
-        (.on "change"
-          (fn [e]
-            (
-              onDropDownChange (.. e -target -id) (.. e -target -value)
-            )
-          )
-        )
-      )
-    )
-  )
+     (fn []
+       (-> (jquery "#users" )
+         (.selectpicker {})
+       )
+     )
+   )
+   (jquery
+     (fn []
+       (-> (jquery "#users" )
+           (.selectpicker "val" (:selecteduser @app-state)
+                          )
+         ;; (if (= 1 nil ) 
+         ;;   (.selectpicker {})
+         ;;   (.selectpicker "val" (:selecteduser @app-state))
+         ;; )
+         ;(.selectpicker {})
+         (.on "change"
+           (fn [e]
+             (
+               onDropDownChange (.. e -target -id) (.. e -target -value)
+             )
+           )
+         )
+       )
+     )
+   )
 )
 
 (defn onDidUpdate [data]
@@ -169,7 +198,7 @@
           )
         )
         (dom/div {:className "collapse navbar-collapse navbar-ex1-collapse" :id "menu"}
-          (dom/ul {:className "nav navbar-nav" :style {:padding-top "17px" :visibility (if (= (:current @app-state) "Trips") "visible" "hidden")}}
+          (dom/ul {:className "nav navbar-nav" :style {:padding-top "17px" :visibility (if (= (:current @data) "Trips") "visible" "hidden")}}
             (dom/li
               ;; (dom/a (assoc style :href "#/eportal")
               ;;   (dom/span {:className "glyphicon glyphicon-home"})

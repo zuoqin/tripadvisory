@@ -159,7 +159,12 @@
                                             :headers {:content-type "application/x-www-form-urlencoded"}
                                             :body (str "grant_type=password&username=" username "&password=" password) 
                                             })
+
+  ;; currently logged in user
   (swap! tripcore/app-state assoc-in [:user :login] username)
+
+  ;; currently selected user
+  (swap! tripcore/app-state assoc-in [:selecteduser] username)
 )
 
 

@@ -62,15 +62,19 @@
 
         start (java.util.Date. (c/to-long (f/parse custom-formatter startdate)))
         end (java.util.Date. (c/to-long (f/parse custom-formatter enddate)))
-        ]  
 
+        result (d/transact
+                 conn
+                 [{:db/id #db/id[:db.part/user -1000001] 
+                   :trip/user userid 
+                   :trip/destination destination 
+                   :trip/startdate start 
+                   :trip/enddate end 
+                   :trip/comment description}]
+                )
+        ]
 
-   (d/transact
-   conn
-   [{:db/id #db/id[:db.part/user -1000001] :trip/user userid :trip/destination destination :trip/startdate start :trip/enddate end :trip/comment description}]
-  )
-
-    ;;userid
+    (second (first (:tempids @result))) 
   )
   
 )

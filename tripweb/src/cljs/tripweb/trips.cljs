@@ -6,6 +6,7 @@
             [tripweb.core :as tripcore]
             [ajax.core :refer [GET POST]]
             [tripweb.settings :as settings]
+            [om-bootstrap.button :as b]
   )
   (:import goog.History)
 )
@@ -31,7 +32,7 @@
 
 
 
-(defn getTrips [data] 
+(defn getTrips [] 
   (GET (str settings/apipath "api/trip?login=" (:login (:user @tripcore/app-state)) ) {
     :handler OnGetTrips
     :error-handler error-handler
@@ -55,14 +56,14 @@
             ;(dom/p  #js {:className "list-group-item-text paddingleft2" :dangerouslySetInnerHTML #js {:__html (get item "body")}} nil)
           ) 
         )                  
-        )(:trips data)
+        ) (:trips ((keyword (:selecteduser @tripcore/app-state)) @data) )
       )
     )
   )
 )
 
 (defn onMount [data]
-  (getTrips data)
+  (getTrips)
   (swap! tripcore/app-state assoc-in [:current] 
     "Trips"
   )
@@ -78,10 +79,16 @@
     (let [style {:style {:margin "10px" :padding-bottom "0px"}}
       styleprimary {:style {:margin-top "70px"}}
       ]
+
       (dom/div
         (om/build tripcore/website-view tripcore/app-state {})
         (dom/div  (assoc styleprimary  :className "panel panel-primary" ;:onClick (fn [e](println e))
         )
+          (dom/div
+            (b/button {:className "btn btn-primary" :onClick (fn [e] (-> js/document
+          .-location
+          (set! "#/tripdetail/0")))} "Add New")
+          )
           (om/build showtrips-view  data {})
         )
       ) 
@@ -94,7 +101,7 @@
 
 (sec/defroute messages-page "/trips" []
   (om/root trips-view
-           app-state
+           tripcore/app-state
            {:target (. js/document (getElementById "app"))}))
 
 
