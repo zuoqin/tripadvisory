@@ -55,7 +55,7 @@
             (dom/h6 {:className "paddingleft2"} (nth item 2))
             ;(dom/p  #js {:className "list-group-item-text paddingleft2" :dangerouslySetInnerHTML #js {:__html (get item "body")}} nil)
           ) 
-        )                  
+        )
         ) (:trips ((keyword (:selecteduser @tripcore/app-state)) @data) )
       )
     )

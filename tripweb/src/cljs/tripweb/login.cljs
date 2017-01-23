@@ -107,11 +107,12 @@
 
 (defn setUser [theUser]
   (let [cnt (count (:users @tripcore/app-state))]
-    (swap! tripcore/app-state assoc-in [:users cnt] {:role (second theUser)  :login (first theUser)})
+    (swap! tripcore/app-state assoc-in [:users cnt] {:role (nth theUser 1)  :login (nth theUser 0) :password (nth theUser 2)})
   )
-  (if (= (first theUser) "zuoqin")   
-    (swap! tripcore/app-state assoc-in [:user :role] (second theUser) )
-  )
+  (swap! tripcore/app-state assoc-in [:user :role] (nth theUser 1) )
+  ;; (if (= (first theUser) "zuoqin")   
+    
+  ;; )
   
 )
 

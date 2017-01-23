@@ -27,10 +27,11 @@
                 (if (or ( = (nth user 1)  "admin" )  
                         ( = (nth user 1)  "manager" )
                         )
-                  (d/q '[:find ?login ?role
+                  (d/q '[:find ?login ?role ?password
                                :where
                                [?u :user/code ?login]
                                [?u :user/role ?role]
+                               [?u :user/password ?password]
                                ]
                         (d/db conn) login) #{})
 

@@ -5,6 +5,10 @@
             [secretary.core :as sec :include-macros true]
             [tripweb.core :as tripcore]
             [ajax.core :refer [GET POST]]
+
+
+            [om-bootstrap.button :as b]
+
             [tripweb.settings :as settings]
   )
   (:import goog.History)
@@ -79,6 +83,11 @@
         (om/build tripcore/website-view tripcore/app-state {})
         (dom/div  (assoc styleprimary  :className "panel panel-primary" ;;:onClick (fn [e](println e))
         )
+          (dom/div
+            (b/button {:className "btn btn-primary" :onClick (fn [e] (-> js/document
+          .-location
+          (set! "#/userdetail")))} "Add New")
+          )
           ; (dom/div {:className "panel-heading"}
           ;   (dom/div {:className "row"}
           ;     ; (dom/div {:className "col-md-10"}

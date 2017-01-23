@@ -1,3 +1,9 @@
+Linux setup:
+
+sudo nohup bin/transactor config/samples/dev-transactor-template.properties
+sudo nohup bin/console -p 8080 dev datomic:dev://localhost:4334/
+
+
 # t5pmobile
 
 d:

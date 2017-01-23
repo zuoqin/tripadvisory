@@ -106,13 +106,8 @@
    (jquery
      (fn []
        (-> (jquery "#users" )
-           (.selectpicker "val" (:selecteduser @app-state)
+         (.selectpicker "val" (:selecteduser @app-state)
                           )
-         ;; (if (= 1 nil ) 
-         ;;   (.selectpicker {})
-         ;;   (.selectpicker "val" (:selecteduser @app-state))
-         ;; )
-         ;(.selectpicker {})
          (.on "change"
            (fn [e]
              (
@@ -198,20 +193,30 @@
           )
         )
         (dom/div {:className "collapse navbar-collapse navbar-ex1-collapse" :id "menu"}
-          (dom/ul {:className "nav navbar-nav" :style {:padding-top "17px" :visibility (if (= (:current @data) "Trips") "visible" "hidden")}}
+          (dom/ul {:className "nav navbar-nav" :style {:padding-top "17px" :visibility (if (= (:current @app-state) "Trips") "visible" "hidden")}}
             (dom/li
               ;; (dom/a (assoc style :href "#/eportal")
               ;;   (dom/span {:className "glyphicon glyphicon-home"})
               ;;     "Trips block"
               ;;   )
+              (dom/div {:style {:visibility 
+                                           (if (and
 
-              (omdom/select #js {:id "users"
-                                 :className "selectpicker"
-                                 :data-show-subtext "true"
-                                 :data-live-search "true"
-                                 :onChange #(handle-change % owner)
-                                 }                
-                (buildUsersList data owner)
+ (= (:current @app-state) "Trips")
+ (or (= (:role (:user @app-state)) "admin")
+                                                 (= (:role (:user @app-state)) "admin"))
+
+)
+                                              "visible" "hidden")}}
+
+                (omdom/select #js {:id "users"
+                                   :className "selectpicker"
+                                   :data-show-subtext "true"
+                                   :data-live-search "true"
+                                   :onChange #(handle-change % owner)
+                                   }                
+                  (buildUsersList data owner)
+                )
               )
               
             )
@@ -224,7 +229,11 @@
                  "Trips"
               )
             )         
-            (dom/li
+            (dom/li {:style {:visibility 
+                                           (if 
+                                             (or (= (:role (:user @app-state)) "admin")
+                                                 (= (:role (:user @app-state)) "manager")) "visible" "hidden")}}
+
               (dom/a (assoc style :href "#/users") 
                 (dom/span {:className "glyphicon glyphicon-log-out"})
                 "Users"

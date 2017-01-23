@@ -21,7 +21,7 @@
 
 ;; parse schema edn file
 (def schema-tx (read-string (slurp "E:/DEV/clojure/tripadv/DB/tripadv-schema.edn")))
-
+;;(def schema-tx (read-string (slurp "/home/ec2-user/tripadv-schema.edn")))
 
 ;; display first statement
 (first schema-tx)
@@ -31,7 +31,7 @@
 
 ;; parse seed data edn file
 (def data-tx (read-string (slurp "E:/DEV/clojure/tripadv/DB/output.clj")))
-;;(def data-tx (read-string (slurp "/root/output.clj")))
+;;(def data-tx (read-string (slurp "/home/ec2-user//output.clj")))
 
 
 ;; display first three statements in seed data transaction
