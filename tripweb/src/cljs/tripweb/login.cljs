@@ -73,9 +73,9 @@
 )
 
 
-(defn OnLoginError [response]
+(defn onLoginError [ response]
   (let [     
-      newdata { :error (get (:response response)  "error") }
+      newdata { :error (get response (keyword "response")) }
     ]
    
     (setLoginError newdata)
@@ -131,20 +131,28 @@
   })
 )
 
-
-(defn OnLogin [response]
+(defn onLoginSuccess [response]
   (
     let [     
       ;response1 (js->clj response)
       newdata {:token (get response (keyword "access_token"))  :expires (get response (keyword "expires_in") ) }
     ]
-
     (.log js/console (str newdata))
     ;;(.log js/console (str (select-keys (js->clj response) [:Title :Reference :Introduction])  ))    
     (swap! tripcore/app-state assoc-in [:token] newdata )
     (swap! tripcore/app-state assoc-in [:view] 1 )
     (swap! tripcore/app-state assoc-in [:users] [] )
     (requser)
+
+  )
+
+
+)
+
+(defn OnLogin [response]
+  (if (= (count response) 0)
+    (onLoginError {:response "Incorrect username or password"} )
+    (onLoginSuccess response)
   )
   
   ;;(.log js/console (str  (response) ))
@@ -156,7 +164,7 @@
 
 (defn dologin [username password]
   (POST (str settings/apipath "token") {:handler OnLogin
-                                            :error-handler OnLoginError
+                                            :error-handler onLoginError
                                             :headers {:content-type "application/x-www-form-urlencoded"}
                                             :body (str "grant_type=password&username=" username "&password=" password) 
                                             })

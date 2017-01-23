@@ -20,8 +20,8 @@
 )
 
 
-(defn checkUser [user]
-  (if (> (count (db/find-user  user)) 0)
+(defn checkUser [user password]
+  (if (> (count (db/find-user  user password)) 0)
     true
     false
   )

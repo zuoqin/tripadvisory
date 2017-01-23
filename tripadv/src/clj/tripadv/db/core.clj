@@ -48,14 +48,15 @@
     (touch conn user)))
 
 
-(defn find-user [login]
+(defn find-user [login password]
   (let [users (d/q '[:find ?login ?r
-                      :in $ ?login
+                      :in $ ?login ?password
                       :where
                       [?u :user/code ?login]
+                      [?u :user/password ?password]
                       [?u :user/role ?r]
                      ]
-                     (d/db conn) login)
+                     (d/db conn) login password)
     ]
     users
   )
