@@ -319,7 +319,7 @@
                 )
                 
                 (dom/h5 "Password: "
-                  (dom/input {:id "password" :type "text" :onChange (fn [e] (handleChange e)) :value (:password @app-state)})
+                  (dom/input {:id "password" :type "password" :onChange (fn [e] (handleChange e)) :value (:password @app-state)})
                 )
                 ;; (dom/h5 "Role: "
                 ;;   (dom/input {:id "role" :type "text" :value (:role @app-state)})

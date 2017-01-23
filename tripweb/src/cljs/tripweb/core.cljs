@@ -239,6 +239,12 @@
                 "Users"
               )
             )
+            (dom/li
+              (dom/a (assoc style :href "#/login")
+                (dom/i {:className "fa fa-sign-out fa-fw"})
+                "Exit"
+              )
+            )
           )
         )
 
