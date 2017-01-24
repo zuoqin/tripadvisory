@@ -17,7 +17,7 @@
 
 ;;(defonce app-state (atom {:text "Hello Chestnut!"}))
 
-(defonce app-state (atom {:view 1 :current "Home" :users []}))
+(defonce app-state (atom {:view 1 :current "Home" :search "" :users []}))
 
 
 (def jquery (js* "$"))
@@ -172,7 +172,9 @@
     )
   )
 )
-
+(defn handleChange [e]
+  (swap! app-state assoc-in [(keyword (.. e -nativeEvent -target -id))] (.. e -nativeEvent -target -value))
+)
 
 (defcomponent trips-navigation-view [data owner]
   (render [_]
@@ -218,8 +220,11 @@
                   (buildUsersList data owner)
                 )
               )
-              
             )
+              (dom/li
+(dom/h5 " "  
+        (dom/input {:id "search" :type "text" :placeholder "Search" :value  (:search @app-state) :onChange (fn [e] (handleChange e )) })  )                
+              )
           )
          
           (dom/ul {:className "nav navbar-nav navbar-right"}

@@ -7,6 +7,9 @@
             [ajax.core :refer [GET POST]]
             [tripweb.settings :as settings]
             [om-bootstrap.button :as b]
+
+            [cljs-time.format :as tf]
+            [cljs-time.coerce :as tc]
   )
   (:import goog.History)
 )
@@ -15,7 +18,9 @@
 
 (defonce app-state (atom  {:users [] :trips [] }))
 
+(def custom-formatter (tf/formatter "dd/MM/yyyy"))
 
+(def custom-formatter1 (tf/formatter "MMM dd yyyy hh:mm:ss"))
 
 (defn OnGetTrips [response]
    (swap! app-state assoc :trips response  )
@@ -43,6 +48,31 @@
 )
 
 
+(defn diffdates [dt1 dt2]
+  (-  (tc/to-long (tc/from-date (nth dt1 3))) (tc/to-long (tc/from-date (nth dt2 3)))  ) 
+)
+
+
+(defn diffindate [dt]
+  (Math/round (/ (-  (tc/to-long (tc/from-date (nth dt 3)))    (tc/to-long (tf/parse custom-formatter1 (str (subs (str (js/Date)) 4 16 )  "00:01:00") ))  )  (* 3600000 24)))  
+)
+
+
+(defn comp-trips
+  [trip1 trip2]
+  (if (< (diffindate trip1) 0)
+    (if (> (diffindate trip2) 0)
+      false
+      (if (> (diffdates trip1 trip2) 0) true false )
+    )
+
+    (if (> (diffindate trip2) 0) 
+      (if (> (diffdates trip1 trip2) 0) false true)
+      true)
+  )
+)
+
+
 (defcomponent showtrips-view [data owner]
   (render
     [_]
@@ -51,12 +81,20 @@
         (dom/span
           (dom/a {:className "list-group-item" :href (str  "#/tripdetail/" (nth item 0) ) }
             (dom/h4  #js {:className "list-group-item-heading" :dangerouslySetInnerHTML #js {:__html (nth item 1)}} nil)
+
+            (dom/h4 {:className "list-group-item-heading" :style {:visibility (if (< (diffindate item) 0) "hidden" "visible")} } (diffindate item))
+
+
             ;(dom/h4 {:className "list-group-item-heading"} (get item "subject"))
             (dom/h6 {:className "paddingleft2"} (nth item 2))
             ;(dom/p  #js {:className "list-group-item-text paddingleft2" :dangerouslySetInnerHTML #js {:__html (get item "body")}} nil)
           ) 
         )
-        ) (:trips ((keyword (:selecteduser @tripcore/app-state)) @data) )
+        ) (sort (comp comp-trips) (filter (fn [trip] (if (or (> (.indexOf (nth trip 1) (:search @tripcore/app-state) ) -1 )  (> (.indexOf (nth trip 2) (:search @tripcore/app-state) ) -1 ))   true false)) 
+                     (:trips ((keyword (:selecteduser @tripcore/app-state)) @data) )
+                     )) 
+
+
       )
     )
   )

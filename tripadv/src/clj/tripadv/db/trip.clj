@@ -10,7 +10,7 @@
 ))
 
 
-(def custom-formatter (f/formatter "dd/mm/yyyy"))
+(def custom-formatter (f/formatter "dd/MM/yyyy"))
 
 
 (defn get-trips [login]

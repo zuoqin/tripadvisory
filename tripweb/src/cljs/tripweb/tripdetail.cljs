@@ -25,7 +25,7 @@
 
 (enable-console-print!)
 
-(def custom-formatter (tf/formatter "dd/mm/yyyy"))
+(def custom-formatter (tf/formatter "dd/MM/yyyy"))
 
 (def custom-formatter1 (tf/formatter "MMM dd yyyy hh:mm:ss"))
 
