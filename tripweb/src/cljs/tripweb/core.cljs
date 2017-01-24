@@ -8,6 +8,8 @@
             [ajax.core :refer [GET POST]]
             [tripweb.settings :as settings]
             [om.dom :as omdom :include-macros true]
+
+            [om-bootstrap.button :as b]
   )
   (:import goog.History)
 )
@@ -17,7 +19,7 @@
 
 ;;(defonce app-state (atom {:text "Hello Chestnut!"}))
 
-(defonce app-state (atom {:view 1 :current "Home" :search "" :users []}))
+(defonce app-state (atom {:view 1 :current "Home" :search "" :ismonthly false :users []}))
 
 
 (def jquery (js* "$"))
@@ -176,6 +178,16 @@
   (swap! app-state assoc-in [(keyword (.. e -nativeEvent -target -id))] (.. e -nativeEvent -target -value))
 )
 
+(defn handleCheck [e]
+  (.stopPropagation e)
+  (.stopImmediatePropagation (.. e -nativeEvent) )
+  (swap! app-state assoc-in [(keyword (.. e -nativeEvent -target -id))] (.. e -nativeEvent -target -checked))
+)
+
+(defn printMonth []
+  (.print js/window)
+)
+
 (defcomponent trips-navigation-view [data owner]
   (render [_]
     (let [style {:style {:margin "10px" :padding-bottom "0px"}}
@@ -201,16 +213,7 @@
               ;;   (dom/span {:className "glyphicon glyphicon-home"})
               ;;     "Trips block"
               ;;   )
-              (dom/div {:style {:visibility 
-                                           (if (and
-
- (= (:current @app-state) "Trips")
- (or (= (:role (:user @app-state)) "admin")
-                                                 (= (:role (:user @app-state)) "admin"))
-
-)
-                                              "visible" "hidden")}}
-
+              (dom/div {:style {:margin-right "10px" :visibility (if (and (= (:current @app-state) "Trips") (or (= (:role (:user @app-state)) "admin") (= (:role (:user @app-state)) "admin")) ) "visible" "hidden")}}
                 (omdom/select #js {:id "users"
                                    :className "selectpicker"
                                    :data-show-subtext "true"
@@ -222,8 +225,15 @@
               )
             )
               (dom/li
-(dom/h5 " "  
-        (dom/input {:id "search" :type "text" :placeholder "Search" :value  (:search @app-state) :onChange (fn [e] (handleChange e )) })  )                
+                (dom/h5 {:style {:margin-left "5px" :margin-right "5px" :height "32px" :margin-top "1px"}} " "
+        (dom/input {:id "search" :type "text" :placeholder "Search" :style {:height "32px" :margin-top "1px"} :value  (:search @app-state) :onChange (fn [e] (handleChange e )) })  )
+              )
+
+              (dom/li
+                (dom/input {:id "ismonthly" :type "checkbox" :defaultChecked false :onChange (fn [e] (handleCheck e))})
+              )
+              (dom/li {:style {:margin-left "5px"}}
+                (b/button {:className "btn btn-info"  :onClick (fn [e] (printMonth))  } "Print this month trips")
               )
           )
          

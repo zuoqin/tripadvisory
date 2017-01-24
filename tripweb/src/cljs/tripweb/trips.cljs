@@ -48,6 +48,15 @@
 )
 
 
+(defn ismonthly [dt]
+  (let [addmonth (+ (tc/to-long (tf/parse custom-formatter1 (str (subs (str (js/Date)) 4 16 )  "00:01:00") )) (* 1000 60 60 24 30))
+        today (tc/to-long (tf/parse custom-formatter1 (str (subs (str (js/Date)) 4 16 )  "00:01:00") ))
+        ]
+    (if (and (>= (nth dt 3) today) (<= (nth dt 3) addmonth)) true false)
+
+  )
+)
+
 (defn diffdates [dt1 dt2]
   (-  (tc/to-long (tc/from-date (nth dt1 3))) (tc/to-long (tc/from-date (nth dt2 3)))  ) 
 )
@@ -82,15 +91,22 @@
           (dom/a {:className "list-group-item" :href (str  "#/tripdetail/" (nth item 0) ) }
             (dom/h4  #js {:className "list-group-item-heading" :dangerouslySetInnerHTML #js {:__html (nth item 1)}} nil)
 
-            (dom/h4 {:className "list-group-item-heading" :style {:visibility (if (< (diffindate item) 0) "hidden" "visible")} } (diffindate item))
+            (dom/h4 {:className "list-group-item-heading" :style {:visibility (if (< (diffindate item) 0) "hidden" "visible")} } (str "Days before trip: " (diffindate item)) )
 
-
-            ;(dom/h4 {:className "list-group-item-heading"} (get item "subject"))
             (dom/h6 {:className "paddingleft2"} (nth item 2))
             ;(dom/p  #js {:className "list-group-item-text paddingleft2" :dangerouslySetInnerHTML #js {:__html (get item "body")}} nil)
           ) 
         )
-        ) (sort (comp comp-trips) (filter (fn [trip] (if (or (> (.indexOf (nth trip 1) (:search @tripcore/app-state) ) -1 )  (> (.indexOf (nth trip 2) (:search @tripcore/app-state) ) -1 ))   true false)) 
+        ) (sort (comp comp-trips) (filter (fn [trip] (if (= (:ismonthly @tripcore/app-state) true)
+
+(if (and (ismonthly trip)  (or (> (.indexOf (nth trip 1) (:search @tripcore/app-state) ) -1 )  (> (.indexOf (nth trip 2) (:search @tripcore/app-state) ) -1 ))  ) true false)
+ 
+
+(if (or (> (.indexOf (nth trip 1) (:search @tripcore/app-state) ) -1 )  (> (.indexOf (nth trip 2) (:search @tripcore/app-state) ) -1 )) true false)
+
+
+
+)) 
                      (:trips ((keyword (:selecteduser @tripcore/app-state)) @data) )
                      )) 
 
