@@ -49,7 +49,7 @@
       newtrips (remove (fn [trip] (if (= (nth trip 0) (:tripid @app-state) ) true false  )) trips)
     ]
 
-    (swap! tripcore/app-state assoc-in [:users] newtrips)
+    (swap! tripcore/app-state assoc-in [(keyword (:selecteduser @tripcore/app-state) ) :trips] newtrips)
   )
   (-> js/document
       .-location
@@ -98,7 +98,7 @@
 (defn OnCreateTripSuccess [response]
   (let [
       trips (:trips ( (keyword (:selecteduser @tripcore/app-state) ) @tripcore/app-state  )  )  
-      addtrips (into [] (conj trips [(:tripid @app-state) (:destination @app-state) (:comment @app-state) (:from @app-state) (:to @app-state)  ]  )) 
+      addtrips (into [] (conj trips [(get response (keyword "id")) (:destination @app-state) (:comment @app-state) (:from @app-state) (:to @app-state)  ]  )) 
     ]
     (swap! tripcore/app-state assoc-in [(keyword (:selecteduser @tripcore/app-state) ) :trips] addtrips)
 
