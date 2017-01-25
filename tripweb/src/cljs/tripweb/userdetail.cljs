@@ -54,8 +54,10 @@
     ;(swap! tripcore/app-state assoc-in [:token] newdata )
     (swap! tripcore/app-state assoc-in [:users] newusers)
   )
-  ;; TO-DO: Delete Trip from Core
-  ;;(.log js/console (str  (get (first response)  "Title") ))
+
+    (-> js/document
+      .-location
+      (set! "#/users"))
 )
 
 (defn OnUpdateUserError [response]

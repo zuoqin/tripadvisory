@@ -30,7 +30,7 @@
 (def custom-formatter1 (tf/formatter "MMM dd yyyy hh:mm:ss"))
 
 (def ch (chan (dropping-buffer 2)))
-(defonce app-state (atom  {:to #inst "2016-01-26T00:01:00.000-00:00" :from #inst "2016-01-26T00:01:00.000-00:00" :destination "" :comment "" :view 1 :tripid 0 :current "Trip Detail"} ))
+(defonce app-state (atom  {:to #inst "2014-01-26T00:01:00.000-00:00" :from #inst "2014-01-26T00:01:00.000-00:00" :destination "" :comment "" :view 1 :tripid 0 :current "Trip Detail"} ))
 
 (defn OnDeleteTripError [response]
   (let [     
@@ -197,13 +197,15 @@
     ;(.log js/console (get (nth fields 2 ) "fieldcode"    )   )
     (dorun (map setdatepicker fields   ))
   )
+
+
 )
 
 
 
 (defn setcontrols []
   (setdatepickers)
-  (.log js/console "fieldcode"       )
+  ;;(.log js/console "fieldcode"       )
 )
 
 (defn initqueue []
@@ -244,9 +246,9 @@
 
 (defn setTripNullValues []
   ;;(swap! app-state assoc-in [:id ]  0) 
-  (swap! app-state assoc-in [:from] (tc/to-date (tf/parse custom-formatter1 (str (subs (js/Date  )  4 16)  "00:01:00")   ))  ) 
-  (swap! app-state assoc-in [:to]  (tc/to-date (tf/parse custom-formatter1 (str (subs (js/Date  )  4 16)  "00:01:00")   ))  )  
-  (swap! app-state assoc-in [:destination] "" ) 
+  (swap! app-state assoc-in [:from] (tc/to-date (tf/parse custom-formatter1 (str (subs (js/Date)  4 16)  "00:01:00")   ))  )
+  (swap! app-state assoc-in [:to]   (tc/to-date (tf/parse custom-formatter1 (str (subs (js/Date)  4 16)  "00:01:00")   ))  )
+  (swap! app-state assoc-in [:destination] "" )
   (swap! app-state assoc-in [:comment ] "")
 )
 
@@ -302,9 +304,10 @@
 
 
 (defn onMount [data]
+  ;(setTripNullValues)
   (swap! tripcore/app-state assoc-in [:current] "Trip Detail")
   (getTripDetail)
-  (setcontrols)
+  (put! ch 42)
 )
 
 (defcomponent tripdetail-page-view [data owner]
@@ -331,10 +334,10 @@
                   (dom/input {:id "destination" :type "text" :value  (:destination @app-state) :onChange (fn [e] (handleChange e )) }))
                 
                 (dom/h5 "To: "
-                  (dom/input {:id "to" :type "text" :value  (tf/unparse custom-formatter (tc/from-date (:to @app-state)) )})
+                  (dom/input {:id "to" :type "text" data-date-format="DD/MM/YYYY" :value  (tf/unparse custom-formatter (tc/from-date (:to @app-state)) )})
                 )
                 (dom/h5 "From: "
-                  (dom/input {:id "from" :type "text" :value  (tf/unparse custom-formatter (tc/from-date (:from @app-state)) )})
+                  (dom/input {:id "from" :type "text" data-date-format="DD/MM/YYYY" :value  (tf/unparse custom-formatter (tc/from-date (:from @app-state)) )})
                 )
                 (dom/h5 "comment: "  
                   (dom/input {:id "comment" :type "text" :value  (:comment @app-state) :onChange (fn [e] (handleChange e )) })  )
@@ -366,7 +369,6 @@
     tripid id
     ]
     (swap! app-state assoc :tripid (js/parseInt id) ) 
-
     (om/root tripdetail-page-view
              app-state
              {:target (. js/document (getElementById "app"))})

@@ -23,7 +23,7 @@
         user (find-user login)
 
         users (if ( = (nth user 1)  "user" ) 
-                (set [login] ) 
+                (set [[login "user" ""]] )
                 (if (or ( = (nth user 1)  "admin" )  
                         ( = (nth user 1)  "manager" )
                         )

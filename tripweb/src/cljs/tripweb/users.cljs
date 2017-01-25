@@ -41,6 +41,15 @@
 )
 
 
+(defn comp-users
+  [user1 user2]
+  (if (> (compare (:login user1) (:login user2)) 0)
+      false
+      true
+  )
+)
+
+
 (defcomponent showusers-view [data owner]
   (render
     [_]
@@ -54,7 +63,7 @@
             ;(dom/p  #js {:className "list-group-item-text paddingleft2" :dangerouslySetInnerHTML #js {:__html (get item "body")}} nil)
           ) 
         )                  
-        )(:users @tripcore/app-state)
+        )(sort (comp comp-users) (:users @tripcore/app-state ))
       )
     )
   )
