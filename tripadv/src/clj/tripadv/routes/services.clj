@@ -49,11 +49,15 @@
     )
 
     (POST "/user" []
-      ;;:return      Long
-      :header-params [authorization :- String]
-      :body-params [login :- String, password :- String, role :- String]
-      :summary     "Create new user"
-      (ok (userapi/createUser (nth (str/split authorization #" ") 1) login password role )))
+        :header-params [authorization :- String]
+        :body-params [login :- String, password :- String, role :- String]
+        :summary     "Create new user"
+
+      (let [result (userapi/createUser (nth (str/split authorization #" ") 1) login password role )]
+        ;;:return      Long
+        (if (nil? (:error result)) (ok result) (bad-request result))
+      )
+    )
 
     (DELETE "/user" []
       ;;:return      Long

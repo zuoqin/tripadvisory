@@ -87,13 +87,23 @@
   )
 )
 
+
+(defn comp-users
+  [user1 user2]
+  (if (> (compare (:login user1) (:login user2)) 0) 
+      false
+      true
+  )
+)
+
+
 (defn buildUsersList [data owner]
   (map
     (fn [text]
       (dom/option {:key (:login text) :value (:login text)
                     :onChange #(handle-change % owner)} (:login text))
     )
-    (:users @app-state )
+    (sort (comp comp-users) (:users @app-state )) 
   )
 )
 
@@ -230,10 +240,12 @@
               )
 
               (dom/li
-                (dom/input {:id "ismonthly" :type "checkbox" :defaultChecked false :onChange (fn [e] (handleCheck e))})
+                (dom/label {:style {:font-weight 100 :margin-top "7px"} }
+                  (dom/input {:id "ismonthly" :type "checkbox" :defaultChecked false :onChange (fn [e] (handleCheck e))}) "Select this month"
+                )
               )
               (dom/li {:style {:margin-left "5px"}}
-                (b/button {:className "btn btn-info"  :onClick (fn [e] (printMonth))  } "Print this month trips")
+                (b/button {:className "btn btn-info"  :onClick (fn [e] (printMonth))  } "Print trips")
               )
           )
          

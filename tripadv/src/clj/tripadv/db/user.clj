@@ -55,13 +55,25 @@
 
 
 (defn create-user [login password role]
-  (d/transact
-   conn
-
-
-   [{:db/id #db/id[:db.part/user -1000001] :user/code login :user/password password :user/role role}]
-
-  )
+  (let [user (first (find-user login))
+  		resinvalid {:tempids [[0 -2]]}
+  		resexists {:tempids [[0 -1]]}
+  		result  (if (= (count user) 0)
+			       (if (> (count login) 4)
+					  (d/transact
+					   conn
+					   [{:db/id #db/id[:db.part/user -1000001] :user/code login :user/password password :user/role role}]
+					  )
+					  resinvalid
+			       )
+			       resexists
+                 )
+  	]
+        (if (nil? (second (first (:tempids result))) )
+          (second (first (:tempids @result)))
+          (second (first (:tempids result)))
+        )
+  ) 
 )
 
 (defn delete-user [login]

@@ -1,4 +1,5 @@
 (ns tripweb.trips (:use [net.unit8.tower :only [t]])
+  (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [om.core :as om :include-macros true]
             [om-tools.dom :as dom :include-macros true]
             [om-tools.core :refer-macros [defcomponent]]
@@ -7,6 +8,8 @@
             [ajax.core :refer [GET POST]]
             [tripweb.settings :as settings]
             [om-bootstrap.button :as b]
+
+            [cljs.core.async :refer [put! dropping-buffer chan take! <!]]
 
             [cljs-time.format :as tf]
             [cljs-time.coerce :as tc]
@@ -21,6 +24,8 @@
 (def custom-formatter (tf/formatter "dd/MM/yyyy"))
 
 (def custom-formatter1 (tf/formatter "MMM dd yyyy hh:mm:ss"))
+
+(def ch (chan (dropping-buffer 2)))
 
 (defn OnGetTrips [response]
    (swap! app-state assoc :trips response  )
@@ -38,13 +43,18 @@
 
 
 (defn getTrips [] 
-  (GET (str settings/apipath "api/trip?login=" (:login (:user @tripcore/app-state)) ) {
-    :handler OnGetTrips
-    :error-handler error-handler
-    :headers {
-      :content-type "application/json"
-      :Authorization (str "Bearer "  (:token (:token @tripcore/app-state))) }
-  })
+
+  (if (> (count (:trips ((keyword (:selecteduser @tripcore/app-state)) @tripcore/app-state)) 0))
+    (tripcore/setUsersDropDown)
+    (GET (str settings/apipath "api/trip?login=" (:login (:user @tripcore/app-state)) ) {
+      :handler OnGetTrips
+      :error-handler error-handler
+      :headers {
+        :content-type "application/json"
+        :Authorization (str "Bearer "  (:token (:token @tripcore/app-state))) }
+    })
+)
+
 )
 
 
@@ -94,7 +104,7 @@
             (dom/h4 {:className "list-group-item-heading" :style {:visibility (if (< (diffindate item) 0) "hidden" "visible")} } (str "Days before trip: " (diffindate item)) )
 
             (dom/h6 {:className "paddingleft2"} (nth item 2))
-            ;(dom/p  #js {:className "list-group-item-text paddingleft2" :dangerouslySetInnerHTML #js {:__html (get item "body")}} nil)
+
           ) 
         )
         ) (sort (comp comp-trips) (filter (fn [trip] (if (= (:ismonthly @tripcore/app-state) true)
@@ -118,12 +128,32 @@
 
 (defn onMount [data]
   (getTrips)
+  (put! ch 42)
   (swap! tripcore/app-state assoc-in [:current] 
     "Trips"
   )
 )
 
 
+(defn setcontrols []
+  (tripcore/setUsersDropDown)
+  (.log js/console "fieldcode"       )
+)
+
+(defn initqueue []
+  (doseq [n (range 1000)]
+    (go ;(while true)
+      (take! ch(
+        fn [v] (
+           setcontrols
+          )
+        )
+      )
+    )
+  )
+)
+
+(initqueue)
 
 (defcomponent trips-view [data owner]
   (will-mount [_]
@@ -153,7 +183,7 @@
 
 
 
-(sec/defroute messages-page "/trips" []
+(sec/defroute trips-page "/trips" []
   (om/root trips-view
            tripcore/app-state
            {:target (. js/document (getElementById "app"))}))

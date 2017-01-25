@@ -27,15 +27,24 @@
 
 (defn createUser [token login password role]
   (let [
-    usercode (:iss (-> token str->jwt :claims)  ) 
+    ;;usercode (:iss (-> token str->jwt :claims)  ) 
     ;;; TO-DO: add check authorization to add 
 
-    result {:res "Success"}
+    result (db/create-user login password role)
+    succ {:res "Success"}
+    err1 {:error  "Login exists "}
+    err2 {:error "Login length should be more than 5"}
     ]
     
-    (db/create-user login password role)
+    ;;(db/create-user login password role)
     ;; TO-DO Add check successfull
-    result
+    (if (< result 0)
+      (if (= result -1)
+        err1
+        err2
+      )
+      succ
+    )
   )
  
 )

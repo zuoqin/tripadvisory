@@ -13,6 +13,7 @@
             [om-bootstrap.button :as b]
             [om-bootstrap.panel :as p]
 
+            [tripweb.registration :as registration]
             [tripweb.userdetail :as userdetail]
             [tripweb.tripdetail :as tripdetail]
             [tripweb.trips :as trips]
@@ -109,10 +110,13 @@
   (let [cnt (count (:users @tripcore/app-state))]
     (swap! tripcore/app-state assoc-in [:users cnt] {:role (nth theUser 1)  :login (nth theUser 0) :password (nth theUser 2)})
   )
-  (swap! tripcore/app-state assoc-in [:user :role] (nth theUser 1) )
-  ;; (if (= (first theUser) "zuoqin")   
-    
-  ;; )
+  
+
+  ;;(.log js/console (nth theUser 0))
+  ;;(.log js/console (:login (:user @tripcore/app-state) ))
+  (if (= (nth theUser 0) (:login (:user @tripcore/app-state) ))   
+    (swap! tripcore/app-state assoc-in [:user :role] (nth theUser 1) )
+  )
   
 )
 
@@ -163,17 +167,19 @@
 )
 
 (defn dologin [username password]
-  (POST (str settings/apipath "token") {:handler OnLogin
-                                            :error-handler onLoginError
-                                            :headers {:content-type "application/x-www-form-urlencoded"}
-                                            :body (str "grant_type=password&username=" username "&password=" password) 
-                                            })
 
   ;; currently logged in user
   (swap! tripcore/app-state assoc-in [:user :login] username)
 
   ;; currently selected user
   (swap! tripcore/app-state assoc-in [:selecteduser] username)
+
+
+  (POST (str settings/apipath "token") {:handler OnLogin
+                                            :error-handler onLoginError
+                                            :headers {:content-type "application/x-www-form-urlencoded"}
+                                            :body (str "grant_type=password&username=" username "&password=" password) 
+                                            })
 )
 
 
@@ -237,6 +243,12 @@
         (dom/input {:className "form-control" :ref "txtPassword" :id "txtPassword" :defaultValue settings/demopassword :type "password"  :placeholder "Password"} )
         (dom/button #js {
           :className (if (= (:state @app-state) 0) "btn btn-lg btn-primary btn-block" "btn btn-lg btn-primary btn-block m-progress" )  :type "button" :onClick (fn [e](checklogin owner))} "Login")
+
+
+        (dom/button #js {
+          :className (if (= (:state @app-state) 0) "btn btn-lg btn-primary btn-block" "btn btn-lg btn-primary btn-block m-progress" )  :type "button"  :onClick (fn [e] (-> js/document
+      .-location
+      (set! "#/registration")))} "Register")
         
       )
       (addModal)
