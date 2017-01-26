@@ -159,7 +159,7 @@
               <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract Users" enabled="true">
                 <stringProp name="RegexExtractor.useHeaders">false</stringProp>
                 <stringProp name="RegexExtractor.refname">allusers</stringProp>
-                <stringProp name="RegexExtractor.regex">\[([^\]]+)\]</stringProp>
+                <stringProp name="RegexExtractor.regex">\[\&quot;([^\&quot;]+)\&quot;</stringProp>
                 <stringProp name="RegexExtractor.template">$1$</stringProp>
                 <stringProp name="RegexExtractor.default">jhgjhghj</stringProp>
                 <stringProp name="RegexExtractor.match_number">-1</stringProp>
@@ -172,7 +172,7 @@
               <boolProp name="ForeachController.useSeparator">true</boolProp>
             </ForeachController>
             <hashTree>
-              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract each user, role, password" enabled="true">
+              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract each user, role, password" enabled="false">
                 <stringProp name="RegexExtractor.useHeaders">false</stringProp>
                 <stringProp name="RegexExtractor.refname">sysuser</stringProp>
                 <stringProp name="RegexExtractor.regex">&quot;([^&quot;]+)&quot;</stringProp>
@@ -188,7 +188,7 @@
                   <collectionProp name="Arguments.arguments">
                     <elementProp name="login" elementType="HTTPArgument">
                       <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                      <stringProp name="Argument.value">${sysuser}</stringProp>
+                      <stringProp name="Argument.value">${userbyid}</stringProp>
                       <stringProp name="Argument.metadata">=</stringProp>
                       <boolProp name="HTTPArgument.use_equals">true</boolProp>
                       <stringProp name="Argument.name">login</stringProp>
