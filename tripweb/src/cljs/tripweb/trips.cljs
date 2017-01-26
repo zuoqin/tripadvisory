@@ -101,7 +101,7 @@
           (dom/a {:className "list-group-item" :href (str  "#/tripdetail/" (nth item 0) ) }
             (dom/h4  #js {:className "list-group-item-heading" :dangerouslySetInnerHTML #js {:__html (nth item 1)}} nil)
 
-            (dom/h4 {:className "list-group-item-heading" :style {:visibility (if (< (diffindate item) 0) "hidden" "visible")} } (str "Days before trip: " (diffindate item)) )
+            (dom/h4 {:className "list-group-item-heading"} (if (< (diffindate item) 0) (str (tf/unparse custom-formatter (tc/from-date (nth item 3)) ) " - " (tf/unparse custom-formatter (tc/from-date (nth item 4)) ))  (str "Days before trip: " (diffindate item)))   )
 
             (dom/h6 {:className "paddingleft2"} (nth item 2))
 

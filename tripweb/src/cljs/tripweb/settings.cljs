@@ -13,8 +13,8 @@
 
 (enable-console-print!)
 
-;(def apipath "http://54.222.215.164:3000/")
+;;(def apipath "http://54.222.215.164:3000/")
 (def apipath "http://localhost:3000/")
-(def demouser "zuoqin")
-(def demopassword "12345")
+(def demouser "")
+(def demopassword "")
 
